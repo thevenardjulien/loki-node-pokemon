@@ -1,7 +1,7 @@
 import { Sequelize, DataTypes } from "sequelize";
+import { user_model } from "../models/usersModel.js";
 import { pokemon_model } from "../models/PokemonsModel.js";
 import process from "process";
-import bdd from "../db/bdd.json" with { type: "json" };
 
 // Initialisation de l'instance Sequelize
 const sequelize = new Sequelize(
@@ -19,6 +19,7 @@ const sequelize = new Sequelize(
 );
 
 // Initialisation du modèle
+export const User = user_model(sequelize, DataTypes);
 export const Pokemon = pokemon_model(sequelize, DataTypes);
 
 // Fonction d'initialisation de la base de données
@@ -29,11 +30,8 @@ export const initDb = async () => {
     console.log("Connexion à la base de données réussie");
 
     // Synchronisation des modèles
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
     console.log("Synchronisation de la base de données réussie");
-
-    // Pokemons initiaux
-    await Pokemon.bulkCreate(bdd.pokemons);
 
     return true;
   } catch (error) {

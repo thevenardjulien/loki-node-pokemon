@@ -1,7 +1,8 @@
 import express from "express";
 import { dirname, sep } from "path";
 import { fileURLToPath } from "url";
-import V1apiRoutes from "./src/routes/v1apiRoutes.js";
+import usersRoutes from "./src/routes/usersRoutes.js";
+import pokemonsRoutes from "./src/routes/pokemonsRoutes.js";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import process from "process";
@@ -46,8 +47,10 @@ app.get("/", (req, res) => {
   res.status(200).send("loki-node-pokemon");
 });
 
+app.use("/api/v1/users", usersRoutes);
+
 // API Routes
-app.use("/api/v1", V1apiRoutes);
+app.use("/api/v1/pokemons", pokemonsRoutes);
 
 // Gestion des erreurs
 app.use((req, res) => {
