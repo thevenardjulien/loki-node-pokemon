@@ -1,6 +1,7 @@
 import express from "express";
 import { dirname, sep } from "path";
 import { fileURLToPath } from "url";
+import authRoutes from "./src/routes/authRoutes.js";
 import usersRoutes from "./src/routes/usersRoutes.js";
 import pokemonsRoutes from "./src/routes/pokemonsRoutes.js";
 import morgan from "morgan";
@@ -47,9 +48,10 @@ app.get("/", (req, res) => {
   res.status(200).send("loki-node-pokemon");
 });
 
-app.use("/api/v1/users", usersRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 // API Routes
+app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/pokemons", pokemonsRoutes);
 
 // Gestion des erreurs
