@@ -3,9 +3,10 @@ import { success, error } from "../lib/sucess.js";
 import fs from "fs";
 import path from "path";
 import { __dirname } from "../../index.js";
+import { Pokemon } from "../db/sequelize.js";
 
-export const getPokemons = (req, res) => {
-  const pokemons = JSON.stringify(bdd.pokemons);
+export const getPokemons = async (req, res) => {
+  const pokemons = await Pokemon.findAll();
   if (pokemons) {
     res.json(success(200, "Pokemons trouvés", pokemons));
   } else {
@@ -13,132 +14,82 @@ export const getPokemons = (req, res) => {
   }
 };
 
-export const getOnePokemon = (req, res) => {
+export const getOnePokemon = async (req, res) => {
   const id = Number(req.params.id);
-  const pokemon = bdd.pokemons.find((pokemon) => pokemon.id === id);
-  if (pokemon) {
-    res.json(success(200, "Pokemon trouvé", pokemon));
+  const selectedPokemon = await Pokemon.findByPk(id);
+  if (selectedPokemon) {
+    res.json(success(200, "Pokemon trouvé", selectedPokemon));
   } else {
     res.json(error(404, "Aucun Pokemon trouvé"));
   }
 };
 
-export const createPokemon = (req, res) => {
-  console.log({
-    "ReqBody: ": req.body,
-  });
+export const createPokemon = async (req, res) => {
+  let dbPokemon;
 
-  const {
-    name = "",
-    hp = 0,
-    cp = 0,
-    picture = "",
-    types = [],
-    created = new Date(),
-  } = req.body;
+  try {
+    if (!req.body) throw new Error("No body received");
 
-  const pokemon = {
-    id: bdd.pokemons.length + 1,
-    name,
-    hp,
-    cp,
-    picture,
-    types,
-    created,
-  };
+    const { name, hp, cp, picture, types } = req.body;
+    if (!name || !hp || !cp || !picture || !types) {
+      return res.json(error(400, "Champs manquants"));
+    }
 
-  if (
-    pokemon &&
-    pokemon.name &&
-    pokemon.hp &&
-    pokemon.cp &&
-    pokemon.picture &&
-    pokemon.types &&
-    pokemon.created
-  ) {
-    bdd.pokemons.push(pokemon);
+    const newId = (await Pokemon.count()) + 1;
 
-    // Update bdd.json
-    fs.writeFileSync(
-      path.resolve(__dirname, "bdd.json"),
-      JSON.stringify(bdd, null, 2),
-    );
+    const createdPokemon = {
+      id: newId,
+      name: String(name).trim(),
+      hp: Number(hp),
+      cp: Number(cp),
+      picture: String(picture).trim(),
+      types: Array.isArray(types) ? types : [types],
+      created: new Date(),
+    };
 
-    res.json(success(200, "Pokemon créé", pokemon));
-  } else {
-    res.json(error(404, "Aucun Pokemon créé"));
+    dbPokemon = await Pokemon.create(createdPokemon);
+
+    return res.json(success(201, "Pokemon créé", dbPokemon));
+  } catch (err) {
+    console.error("ERREUR COMPLÈTE:", err);
+    return res.json(error(500, "Erreur serveur", err));
   }
 };
 
-export const editPokemon = (req, res) => {
+export const editPokemon = async (req, res) => {
   const id = Number(req.params.id);
-  const pokemon = bdd.pokemons.find((pokemon) => pokemon.id === id);
-  if (pokemon) {
-    const {
-      name = "",
-      hp = 0,
-      cp = 0,
-      picture = "",
-      types = [],
-      created = new Date(),
-    } = req.body;
+  const editedPokemon = await Pokemon.findByPk(id);
+  if (editedPokemon) {
+    const { name, hp, cp, picture, types } = req.body;
+    if (!name || !hp || !cp || !picture || !types) {
+      return res.json(error(400, "Champs manquants"));
+    }
 
     const updatedPokemon = {
-      id,
-      name,
-      hp,
-      cp,
-      picture,
-      types,
-      created,
+      id: id,
+      name: String(name).trim(),
+      hp: Number(hp),
+      cp: Number(cp),
+      picture: String(picture).trim(),
+      types: Array.isArray(types) ? types : [types],
+      created: editedPokemon.created,
     };
-    if (
-      updatedPokemon &&
-      updatedPokemon.name &&
-      updatedPokemon.hp &&
-      updatedPokemon.cp &&
-      updatedPokemon.picture &&
-      updatedPokemon.types &&
-      updatedPokemon.created
-    ) {
-      bdd.pokemons = bdd.pokemons.map((pokemon) => {
-        if (pokemon.id === id) {
-          return updatedPokemon;
-        } else {
-          return pokemon;
-        }
-      });
 
-      // Update bdd.json
-      fs.writeFileSync(
-        path.resolve(__dirname, "bdd.json"),
-        JSON.stringify(bdd, null, 2),
-      );
+    await Pokemon.update(updatedPokemon, {
+      where: { id: id },
+    });
 
-      res.json(success(200, "Pokemon édité", updatedPokemon));
-    } else {
-      res.json(error(404, "Aucun Pokemon édité"));
-    }
+    return res.json(success(200, "Pokemon modifié", updatedPokemon));
   } else {
-    res.json(error(404, "Aucun Pokemon trouvé"));
+    res.json(error(404, "Aucun Pokemon modifié"));
   }
 };
 
 export const deletePokemon = (req, res) => {
   const id = Number(req.params.id);
-  const pokemon = bdd.pokemons.find((pokemon) => pokemon.id === id);
+  const pokemon = Pokemon.findByPk(id);
   if (pokemon) {
-    const index = bdd.pokemons.findIndex((pokemon) => pokemon.id === id);
-
-    if (index !== -1) {
-      bdd.pokemons.splice(index, 1);
-    }
-
-    // Update bdd.json
-    fs.writeFileSync(
-      path.resolve(__dirname, "bdd.json"),
-      JSON.stringify(bdd, null, 2),
-    );
+    Pokemon.destroy({ where: { id: id } });
 
     res.json(success(200, "Pokemon supprimé", pokemon));
   } else {

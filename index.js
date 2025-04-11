@@ -5,7 +5,7 @@ import V1apiRoutes from "./src/routes/v1apiRoutes.js";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import process from "process";
-import { initDb } from "./src/db/init.js";
+import { initDb } from "./src/db/sequelize.js";
 
 export const app = express();
 export const __dirname = dirname(fileURLToPath(import.meta.url)) + sep;

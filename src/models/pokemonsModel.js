@@ -36,3 +36,7 @@ export const pokemon_model = (sequelize, DataTypes) => {
     },
   );
 };
+
+export const initPokemonModel = (sequelize) => {
+  return pokemon_model(sequelize, sequelize.DataTypes);
+};
