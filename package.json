@@ -1,0 +1,22 @@
+{
+  "name": "loki-node-pokemon",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --env-file=.env.development index.js",
+    "dev:watch": "nodemon --exec \"node --env-file=.env.development\" index.js",
+    "start": "node --env-file=.env.production index.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^10.1.2",
+    "prettier": "3.5.3"
+  }
+}
