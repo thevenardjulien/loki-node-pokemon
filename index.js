@@ -2,6 +2,7 @@ import express from "express";
 import { dirname, sep } from "path";
 import { fileURLToPath } from "url";
 import V1apiRoutes from "./routes/v1apiRoutes.js";
+import morgan from "morgan";
 
 export const app = express();
 export const __dirname = dirname(fileURLToPath(import.meta.url)) + sep;
@@ -22,6 +23,7 @@ app.use(express.static(cfg.dir.public));
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
 
 // Debug middleware
 app.use((req, res, next) => {
