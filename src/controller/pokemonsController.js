@@ -1,8 +1,8 @@
-import bdd from "../bdd.json" with { type: "json" };
+import bdd from "../db/bdd.json" with { type: "json" };
 import { success, error } from "../lib/sucess.js";
 import fs from "fs";
 import path from "path";
-import { __dirname } from "../index.js";
+import { __dirname } from "../../index.js";
 
 export const getPokemons = (req, res) => {
   const pokemons = JSON.stringify(bdd.pokemons);

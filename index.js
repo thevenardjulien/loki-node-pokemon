@@ -1,8 +1,11 @@
 import express from "express";
 import { dirname, sep } from "path";
 import { fileURLToPath } from "url";
-import V1apiRoutes from "./routes/v1apiRoutes.js";
+import V1apiRoutes from "./src/routes/v1apiRoutes.js";
 import morgan from "morgan";
+import bodyParser from "body-parser";
+import process from "process";
+import { initDb } from "./src/db/init.js";
 
 export const app = express();
 export const __dirname = dirname(fileURLToPath(import.meta.url)) + sep;
@@ -17,13 +20,16 @@ const cfg = {
   },
 };
 
+// DB
+initDb();
+
 // Static files
 app.use(express.static(cfg.dir.public));
 
 // Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Debug middleware
 app.use((req, res, next) => {
